@@ -4,4 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+html-builder = "0.5.1"
 pulldown-cmark = "0.12.2"
