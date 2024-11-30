@@ -6,6 +6,37 @@ use oauth2::{
 use reqwest::header::{HeaderMap, AUTHORIZATION};
 use std::io::{self, Write};
 
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GoogleForm {
+    pub form_id: String,
+    pub info: Info,
+    pub settings: FormSettings,
+    pub items: Vec<Item>,
+    pub revision_id: String,
+    pub responder_uri: String,
+    pub linked_sheet_id: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Info {
+    // Infoの具体的なフィールドをここに追加
+    // 例: pub title: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct FormSettings {
+    // FormSettingsの具体的なフィールドをここに追加
+    // 例: pub is_public: bool,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Item {
+    // Itemの具体的なフィールドをここに追加
+    // 例: pub question: String,
+}
+
 pub(super) async fn main() {
     dbg!("fetch_google_forms");
 }
@@ -62,7 +93,7 @@ pub(super) async fn get_access_token(
 pub(super) async fn fetch_google_form(
     access_token: &str,
     form_id: &str,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<GoogleForm, Box<dyn std::error::Error>> {
     dbg!("fetch_google_form");
     let url = format!(
         "https://forms.googleapis.com/v1/forms/{}",
@@ -80,12 +111,23 @@ pub(super) async fn fetch_google_form(
     let response = client.get(url).headers(headers).send().await?;
 
     // レスポンスを確認
-    if response.status().is_success() {
-        let body = response.text().await?;
-        println!("Response body: {}", body);
-    } else {
-        println!("Request failed with status: {}", response.status());
-    }
+    let body = match response.status().is_success() {
+        true => response.text().await?,
+        false => {
+            dbg!("Request failed with status: {}", response.status());
+            return Err("Request failed".into());
+        }
+    };
 
-    Ok(())
+    // if response.status().is_success() {
+    //     body = response.text().await?;
+    //     println!("Response body: {}", &body);
+    // } else {
+    //     println!("Request failed with status: {}", response.status());
+    // }
+
+    let google_form: GoogleForm = serde_json::from_str(&body)?;
+    dbg!({}, &google_form);
+
+    Ok(google_form)
 }
