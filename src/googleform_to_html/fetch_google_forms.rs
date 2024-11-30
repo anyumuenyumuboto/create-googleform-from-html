@@ -8,38 +8,117 @@ use std::io::{self, Write};
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Default)]
 pub struct GoogleForm {
+    #[serde(alias = "formId")]
     pub form_id: String,
     pub info: Info,
     pub settings: FormSettings,
     pub items: Vec<Item>,
+    #[serde(alias = "revisionId")]
     pub revision_id: String,
+    #[serde(alias = "responderUri")]
     pub responder_uri: String,
-    pub linked_sheet_id: String,
+    #[serde(alias = "linkedSheetId")]
+    pub linked_sheet_id: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Default)]
 pub struct Info {
-    // Infoの具体的なフィールドをここに追加
-    // 例: pub title: String,
+    pub title: String,
+    #[serde(alias = "documentTitle")]
+    pub document_title: String,
+    pub description: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Default)]
 pub struct FormSettings {
-    // FormSettingsの具体的なフィールドをここに追加
-    // 例: pub is_public: bool,
+    #[serde(alias = "quizSettings")]
+    pub quiz_settings: Option<QuizSettings>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct QuizSettings {
+    #[serde(alias = "isQuiz")]
+    pub is_quiz: bool,
+}
+
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct Item {
+    #[serde(alias = "itemId")]
+    pub item_id: Option<String>,
+    pub title: Option<String>,
+    pub description: Option<String>,
+    // #[serde(flatten)]
+    // pub kind: ItemKind,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Item {
-    // Itemの具体的なフィールドをここに追加
-    // 例: pub question: String,
+#[serde(tag = "type", rename_all = "camelCase")]
+pub enum ItemKind {
+    QuestionItem {
+        question_item: QuestionItem,
+    },
+    QuestionGroupItem {
+        question_group_item: QuestionGroupItem,
+    },
+    PageBreakItem {
+        page_break_item: PageBreakItem,
+    },
+    TextItem {
+        text_item: TextItem,
+    },
+    ImageItem {
+        image_item: ImageItem,
+    },
+    VideoItem {
+        video_item: VideoItem,
+    },
 }
 
-pub(super) async fn main() {
-    dbg!("fetch_google_forms");
+impl Default for ItemKind {
+    fn default() -> Self {
+        ItemKind::TextItem {
+            text_item: TextItem {
+                // content: String::new(),
+            },
+        }
+    }
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct QuestionItem {
+    // フィールドを定義（仮）
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct QuestionGroupItem {
+    // フィールドを定義（仮）
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct PageBreakItem {
+    // フィールドを定義（仮）
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct TextItem {
+    // フィールドを定義（仮）
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ImageItem {
+    // フィールドを定義（仮）
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct VideoItem {
+    // フィールドを定義（仮）
+}
+
+// pub(super) async fn main() {
+//     dbg!("fetch_google_forms");
+// }
 
 pub(super) async fn get_access_token(
     client_id_in: &str,
@@ -109,25 +188,59 @@ pub(super) async fn fetch_google_form(
     let client = reqwest::Client::new();
     // GETリクエストを送信
     let response = client.get(url).headers(headers).send().await?;
+    dbg!(&response);
 
     // レスポンスを確認
-    let body = match response.status().is_success() {
-        true => response.text().await?,
-        false => {
-            dbg!("Request failed with status: {}", response.status());
-            return Err("Request failed".into());
-        }
-    };
+    // let body = match response.status().is_success() {
+    //     true => response.text().await?,
+    //     false => {
+    //         dbg!("Request failed with status: {}", response.status());
+    //         return Err("Request failed".into());
+    //     }
+    // };
 
-    // if response.status().is_success() {
-    //     body = response.text().await?;
-    //     println!("Response body: {}", &body);
-    // } else {
-    //     println!("Request failed with status: {}", response.status());
-    // }
+    // dbg!(&body);
 
-    let google_form: GoogleForm = serde_json::from_str(&body)?;
-    dbg!({}, &google_form);
+    // let body = response.json::<GoogleForm>().await?;
+    // let body = response.text().await?;
+    let body = response
+        .json::<GoogleForm>()
+        .await
+        .expect("json_parse_error");
+    dbg!(&body);
 
-    Ok(google_form)
+    // let google_form: GoogleForm = serde_json::from_str(&body)?;
+    // dbg!(&google_form);
+
+    // let body2 = GoogleForm {
+    //     form_id: "a".to_string(),
+    // };
+    Ok(body)
 }
+
+// pub(super) async fn fetch_google_form_text(
+//     access_token: &str,
+//     form_id: &str,
+// ) -> Result<(), Box<dyn std::error::Error>> {
+//     dbg!("fetch_google_form");
+//     let url = format!(
+//         "https://forms.googleapis.com/v1/forms/{}",
+//         form_id.to_string()
+//     );
+//     // ヘッダーを作成
+//     let mut headers = HeaderMap::new();
+//     headers.insert(
+//         AUTHORIZATION,
+//         format!("Bearer {}", access_token.to_string()).parse()?,
+//     );
+//     // クライアントを作成
+//     let client = reqwest::Client::new();
+//     // GETリクエストを送信
+//     let response = client.get(url).headers(headers).send().await?;
+//     dbg!(&response);
+//
+//     let body = response.text().await?;
+//     dbg!(&body);
+//
+//     Ok(())
+// }
