@@ -16,9 +16,9 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let form_id = env::var("FORM_ID").expect("FORM_ID must be set");
 
     let access_token = fetch_google_forms::get_access_token(&client_id, &client_secret).await?;
-    // fetch_google_forms::fetch_google_form_text(&access_token, &form_id).await?;
+    fetch_google_forms::fetch_google_form_text(&access_token, &form_id).await?;
     let google_form = fetch_google_forms::fetch_google_form(&access_token, &form_id).await?;
-    dbg!(&google_form);
+    // dbg!(&google_form);
     Ok(())
 }
 
