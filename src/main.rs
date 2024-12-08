@@ -1,12 +1,14 @@
 use pulldown_cmark;
-use std::fs::File;
-use std::io::Read;
 
-mod googleform_to_html;
+// mod googleform_to_html;
+// mod markdown_to_html;
+mod models;
+mod modules;
 
 fn main() {
-    println!("Hello, world!");
-    googleform_to_html::main();
+    dbg!("main.rs");
+    modules::main();
+    // googleform_to_html::main();
 }
 
 // fn tamesi2() {
