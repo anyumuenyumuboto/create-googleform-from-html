@@ -1,7 +1,90 @@
 use scraper::{Html, Selector};
 use serde_json::json;
+use std::fs;
+use std::path::Path;
 
-pub fn main() {
+use crate::models::google_form::ChoiceOption;
+use crate::models::google_form::ChoiceQuestion;
+use crate::models::google_form::ChoiceType;
+use crate::models::google_form::GoogleForm;
+use crate::models::google_form::Info;
+use crate::models::google_form::Item;
+use crate::models::google_form::Question;
+use crate::models::google_form::QuestionItem;
+
+use crate::models::markdown_form::ChoiceQuestion as MarkdownChoiceQuestion;
+
+pub fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // sample();
+    create_googleform_choicequestion();
+    let html = read_html_file(Path::new("README.html"))?;
+    dbg!(html_to_choice_question(&html));
+    Ok(())
+}
+
+pub fn read_html_file(file_path: &Path) -> Result<String, Box<dyn std::error::Error>> {
+    let content = fs::read_to_string(file_path)?;
+    dbg!(&content);
+    Ok(content)
+}
+
+pub fn html_to_choice_question(html_string: &str) -> MarkdownChoiceQuestion {
+    dbg!(&html_string);
+
+    // HTMLをパース
+    let document = Html::parse_document(html_string);
+
+    // checkboxを選択するセレクタ
+    let checkbox_selector = Selector::parse(r#"input[type="checkbox"]"#).unwrap();
+
+    dbg!(checkbox_selector);
+
+    let choice_question = MarkdownChoiceQuestion::default();
+    choice_question
+}
+
+pub fn create_googleform_choicequestion() -> GoogleForm {
+    // let googleform_default = GoogleForm::default();
+    // let item_default = Item::default();
+    // let question_default = Question::default();
+    // let choice_question_default = ChoiceQuestion::default();
+    let choice_option_tamesi = ChoiceOption {
+        value: String::from("apple"),
+        ..ChoiceOption::default()
+    };
+    let choice_question_tamesi = ChoiceQuestion {
+        r#type: Some(ChoiceType::CHECKBOX),
+        options: vec![choice_option_tamesi],
+        ..ChoiceQuestion::default()
+    };
+    let question_tamesi = Question {
+        choice_question: Some(choice_question_tamesi),
+        ..Question::default()
+    };
+    let item_tamesi = Item {
+        title: Some(String::from("質問1")),
+        description: Some(String::from("これは仮の質問です")),
+        question_item: Some(QuestionItem {
+            question: Some(question_tamesi),
+            image: None,
+        }),
+        ..Item::default()
+    };
+    let googleform_choicequestion = GoogleForm {
+        info: Info {
+            title: String::from("試し"),
+            document_title: String::from("試し"),
+            description: None,
+        },
+        items: vec![item_tamesi],
+        ..GoogleForm::default()
+    };
+    dbg!(&googleform_choicequestion);
+    dbg!(&googleform_choicequestion.info.title);
+    googleform_choicequestion
+}
+
+pub fn sample() {
     // サンプルHTML
     let html = r#"
         <html>

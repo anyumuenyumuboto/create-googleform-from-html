@@ -1,8 +1,5 @@
 use dotenv::dotenv;
-// use html_builder::Buffer;
-// use html_builder::Html5;
 use std::env;
-// use std::fmt::Write;
 
 use crate::models::google_form::GoogleForm;
 pub mod fetch_google_forms;

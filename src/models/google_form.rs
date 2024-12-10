@@ -102,7 +102,8 @@ pub enum ChoiceType {
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct ChoiceOption {
-    pub value: Option<String>,
+    // pub value: Option<String>,
+    pub value: String,
     pub image: Option<Image>,
     #[serde(alias = "isOther")]
     pub is_other: Option<bool>,
