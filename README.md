@@ -6,11 +6,18 @@
 
 Which fruit do you like the best from these options?
 
-- [ ] apple
+- [x] apple
 - [ ] banana
 - [ ] strawberry
 
 
+```rust:marksurvey.rs
+fn main() {
+ println!("marksurvey");
+}
 ```
 
-```
+$$
+\frac{x}{x+1}
+$$
+

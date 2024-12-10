@@ -91,6 +91,7 @@ pub struct ChoiceQuestion {
     pub shuffle: Option<bool>,
 }
 
+#[allow(non_camel_case_types)]
 #[derive(Serialize, Deserialize, Debug)]
 pub enum ChoiceType {
     CHOICE_TYPE_UNSPECIFIED,
@@ -111,6 +112,7 @@ pub struct ChoiceOption {
     pub go_to_section_id: Option<String>,
 }
 
+#[allow(non_camel_case_types)]
 #[derive(Serialize, Deserialize, Debug)]
 pub enum GoToAction {
     GO_TO_ACTION_UNSPECIFIED,
@@ -158,6 +160,7 @@ pub struct FileUploadQuestion {
     pub max_file_size: Option<String>,
 }
 
+#[allow(non_camel_case_types)]
 #[derive(Serialize, Deserialize, Debug)]
 pub enum FileType {
     FILE_TYPE_UNSPECIFIED,
@@ -259,6 +262,7 @@ pub struct MediaProperties {
     pub width: Option<isize>,
 }
 
+#[allow(non_camel_case_types)]
 #[derive(Serialize, Deserialize, Debug)]
 pub enum Alignment {
     ALIGNMENT_UNSPECIFIED,

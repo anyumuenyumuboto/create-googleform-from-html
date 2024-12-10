@@ -1,8 +1,8 @@
 use dotenv::dotenv;
-use html_builder::Buffer;
-use html_builder::Html5;
+// use html_builder::Buffer;
+// use html_builder::Html5;
 use std::env;
-use std::fmt::Write;
+// use std::fmt::Write;
 
 use crate::models::google_form::GoogleForm;
 pub mod fetch_google_forms;
@@ -28,21 +28,3 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // dbg!(&google_form);
     Ok(())
 }
-
-// fn build_html() -> Result<(), Box<dyn std::error::Error>> {
-//     let mut buf = Buffer::new(); // Contents added to buffer by each statement:
-//     let mut html = buf.html().attr("lang='en'"); // <html lang='en'>
-//     writeln!(html.head().title(), "Title!")?; // <head><title>Title!
-//     writeln!(html.body().h1(), "Header!")?; // </title></head><body><h1>Header!
-//     let html_string = buf.finish(); // </h1></body></html>
-//     dbg!("{}", html_string);
-//     Ok(())
-// }
-
-// async fn get_google_forms() -> Result<(), Box<dyn std::error::Error>> {
-//     dbg!("get_google_forms");
-//     let url = "https://www.rust-lang.org";
-//     let contents = reqwest::get(url).await?.text().await?;
-//     dbg!("{:?}", contents);
-//     Ok(())
-// }

@@ -21,7 +21,15 @@ fn read_markdown_from_file(file_path: &str) -> Result<String, Box<dyn std::error
 }
 
 fn parse(markdown_input: &str) -> Result<String, Box<dyn std::error::Error>> {
-    let parser = pulldown_cmark::Parser::new(markdown_input);
+    let mut options = pulldown_cmark::Options::empty();
+    options.insert(pulldown_cmark::Options::ENABLE_TABLES);
+    options.insert(pulldown_cmark::Options::ENABLE_FOOTNOTES);
+    options.insert(pulldown_cmark::Options::ENABLE_STRIKETHROUGH);
+    options.insert(pulldown_cmark::Options::ENABLE_TASKLISTS);
+    options.insert(pulldown_cmark::Options::ENABLE_SMART_PUNCTUATION);
+    options.insert(pulldown_cmark::Options::ENABLE_HEADING_ATTRIBUTES);
+
+    let parser = pulldown_cmark::Parser::new_ext(markdown_input, options);
 
     // Write to a new String buffer.
     let mut html_output = String::new();
