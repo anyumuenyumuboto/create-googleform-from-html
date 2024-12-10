@@ -2,8 +2,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct MarkdownForm {
-    title: String,
-    question: Vec<Question>,
+    pub title: String,
+    pub questions: Vec<Question>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -13,7 +13,7 @@ pub enum Question {
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct ChoiceQuestion {
-    title: String,
-    description: Option<String>,
-    choice_option: Vec<String>,
+    pub title: String,
+    pub description: Option<String>,
+    pub options: Vec<String>,
 }

@@ -34,12 +34,35 @@ pub fn html_to_choice_question(html_string: &str) -> MarkdownChoiceQuestion {
     // HTMLをパース
     let document = Html::parse_document(html_string);
 
-    // checkboxを選択するセレクタ
-    let checkbox_selector = Selector::parse(r#"input[type="checkbox"]"#).unwrap();
+    // checkboxの選択肢のリストを選択するセレクタ
+    let checkbox_selector = Selector::parse(r#"li:has(>input[type="checkbox"])"#).unwrap();
 
-    dbg!(checkbox_selector);
+    //  let html_selected = document
+    //      .select(&checkbox_selector)
+    //      .nth(0)
+    //      .expect("REASON")
+    //      .text()
+    //      // .value();
+    //      .collect::<Vec<_>>()
+    //      .concat();
 
-    let choice_question = MarkdownChoiceQuestion::default();
+    let html_selected = document
+        .select(&checkbox_selector)
+        .map(|x| {
+            x.text()
+                .collect::<Vec<_>>()
+                .concat()
+                .trim_start()
+                .to_string()
+        })
+        .collect::<Vec<_>>();
+
+    dbg!(&html_selected);
+
+    let choice_question = MarkdownChoiceQuestion {
+        options: html_selected,
+        ..MarkdownChoiceQuestion::default()
+    };
     choice_question
 }
 
