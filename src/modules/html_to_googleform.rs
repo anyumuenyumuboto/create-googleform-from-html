@@ -18,7 +18,9 @@ pub fn main() -> Result<(), Box<dyn std::error::Error>> {
     // sample();
     create_googleform_choicequestion();
     let html = read_html_file(Path::new("README.html"))?;
-    dbg!(html_to_choice_question(&html));
+    let markdown_choice_question = html_to_choice_question(&html);
+    dbg!(&markdown_choice_question);
+    choice_question_to_googleform_item(markdown_choice_question);
     Ok(())
 }
 
@@ -66,6 +68,37 @@ pub fn html_to_choice_question(html_string: &str) -> MarkdownChoiceQuestion {
     choice_question
 }
 
+pub fn choice_question_to_googleform_item(
+    markdown_choice_question: MarkdownChoiceQuestion,
+) -> Item {
+    let options = markdown_choice_question
+        .options
+        .iter()
+        .map(|x| ChoiceOption {
+            value: x.to_string(),
+            ..ChoiceOption::default()
+        })
+        .collect::<Vec<_>>();
+
+    let item = Item {
+        title: Some(markdown_choice_question.title),
+        description: markdown_choice_question.description,
+        question_item: Some(QuestionItem {
+            question: Some(Question {
+                choice_question: Some(ChoiceQuestion {
+                    options: options,
+                    // vec![ChoiceOption::default()],
+                    ..ChoiceQuestion::default()
+                }),
+                ..Question::default()
+            }),
+            ..QuestionItem::default()
+        }),
+        ..Item::default()
+    };
+    dbg!(&item);
+    item
+}
 pub fn create_googleform_choicequestion() -> GoogleForm {
     // let googleform_default = GoogleForm::default();
     // let item_default = Item::default();
