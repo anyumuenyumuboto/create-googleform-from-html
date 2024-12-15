@@ -6,7 +6,8 @@ pub struct GoogleForm {
     pub form_id: String,
     pub info: Info,
     pub settings: Option<FormSettings>,
-    pub items: Vec<Item>,
+    // pub items: Vec<Item>,
+    pub items: Option<Vec<Item>>,
     #[serde(alias = "revisionId")]
     pub revision_id: String,
     #[serde(alias = "responderUri")]

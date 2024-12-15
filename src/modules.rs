@@ -7,5 +7,5 @@ pub async fn main() {
     dbg!("module.rs");
     let _ = markdown_to_html::main();
     // let _ = googleform_to_html::main().await.unwrap();
-    html_to_googleform::main();
+    let _ = html_to_googleform::main().await.unwrap();
 }
