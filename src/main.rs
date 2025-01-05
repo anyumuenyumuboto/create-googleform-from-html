@@ -1,36 +1,35 @@
-use clap::{Parser, ValueEnum};
+use clap::{Parser, Subcommand};
 use std::path::Path;
 use tokio;
 
 mod models;
 mod modules;
 
+use crate::modules::LogLevel;
 use crate::modules::MarksurveyArgs;
 
 #[derive(Parser, Debug)]
 #[command(version, about)]
 pub struct Args {
-    #[arg(long)]
-    pub input_type: Option<String>,
     /// input file path
-    #[arg(short, long , value_parser = validate_file_extension)]
+    #[arg(short, long, value_parser = validate_file_extension)]
     pub input: Option<String>,
-    #[arg(long)]
-    pub output_type: Option<String>,
     /// output file path
-    #[arg(short, long)]
+    #[arg(short, long, value_parser = validate_file_extension)]
     pub output: Option<String>,
+    #[command(subcommand)]
+    command: Option<Commands>,
+    // /// google OAuth 2.0 client id
+    // #[arg(long)]
+    // pub client_id: Option<String>,
+    // /// google OAuth 2.0 client secret
+    // #[arg(long)]
+    // pub client_secret: Option<String>,
     /// google form id
-    #[arg(long)]
-    pub client_id: Option<String>,
-    /// google OAuth 2.0 client id
-    #[arg(long)]
-    pub client_secret: Option<String>,
-    /// google OAuth 2.0 client secret
     #[arg(long)]
     pub form_id: Option<String>,
     /// LogLevel
-    #[arg(long, Value_enum, default_value_t = LogLevel::Info)]
+    #[arg(long, value_enum, default_value_t = LogLevel::Info)]
     log_level: LogLevel,
     // /// Output detailed standard output
     // #[arg(short, long)]
@@ -40,25 +39,52 @@ pub struct Args {
     pub dry_run: bool,
 }
 
-#[derive(Debyg, Clone, ValueEnum)]
-enum LogLevel {
-    Debug,
-    Info,
-    Warn,
-    Error,
-    Critical,
+// #[derive(Debug, Clone, ValueEnum)]
+// enum LogLevel {
+//     Debug,
+//     Info,
+//     Warn,
+//     Error,
+//     Critical,
+// }
+
+#[derive(Debug, Subcommand)]
+enum Commands {
+    Googleform {
+        /// The client ID for Google API
+        #[arg(long, help = "Specify the client ID for the Google API.")]
+        client_id: String,
+        /// The client secret for Google API
+        #[arg(long, help = "Specify the client secret for the Google API.")]
+        client_secret: String,
+        /// The form id of the Google Form
+        #[arg(long, help = "Specify the form id of the Google Form.")]
+        form_id: String,
+    },
 }
 
 impl From<Args> for MarksurveyArgs {
     fn from(args: Args) -> Self {
+        // googleformサブコマンドのオプションの値を取得するための処理
+        let (client_id_value, client_secret_value, form_id_value) = match &args.command {
+            Some(Commands::Googleform {
+                client_id,
+                client_secret,
+                form_id,
+            }) => (
+                Some(client_id.clone()),
+                Some(client_secret.clone()),
+                Some(form_id.clone()),
+            ),
+            _ => (None, None, None),
+        };
+
         MarksurveyArgs {
-            input_type: args.input_type,
             input: args.input,
-            output_type: args.output_type,
             output: args.output,
-            client_id: args.client_id,
-            client_secret: args.client_secret,
-            form_id: args.form_id,
+            client_id: client_id_value,
+            client_secret: client_secret_value,
+            form_id: form_id_value,
             // verbose: args.verbose,
             log_level: args.log_level,
             dry_run: args.dry_run,

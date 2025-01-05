@@ -13,7 +13,7 @@
 
 ## todo
 
-- [ ] googleform サブコマンドを作る
+- [ x ] googleform サブコマンドを作る
 ref: [clapの使い方まとめ - ぽよメモ](https://poyo.hatenablog.jp/entry/2022/10/10/170000#f-75a0c979)
 
-
+- [ ] env_loggerを使う。エラーメッセージのファイル名と行数も出力するようにする。

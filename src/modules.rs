@@ -6,14 +6,13 @@ pub mod markdown_to_html;
 pub mod output;
 
 use crate::models::google_form::GoogleForm;
+use clap::ValueEnum;
 // use tokio;
 
 #[derive(Debug)]
 pub struct MarksurveyArgs {
-    pub input_type: Option<String>,
     /// input file path
     pub input: Option<String>,
-    pub output_type: Option<String>,
     /// output file path
     pub output: Option<String>,
     /// google form id
@@ -23,14 +22,14 @@ pub struct MarksurveyArgs {
     /// google OAuth 2.0 client secret
     pub form_id: Option<String>,
     pub log_level: LogLevel,
-    /// Suppressse output
-    pub quiet: bool,
+    // /// Suppressse output
+    // pub quiet: bool,
     /// Run the command in dry-run mode
     pub dry_run: bool,
 }
 
-#[derive(Debyg, Clone, ValueEnum)]
-enum LogLevel {
+#[derive(Debug, Clone, ValueEnum)]
+pub enum LogLevel {
     Debug,
     Info,
     Warn,
@@ -45,13 +44,13 @@ pub async fn main(marksurvey_args: MarksurveyArgs) -> Result<(), Box<dyn std::er
     // let _ = markdown_to_html::main();
     // let _ = googleform_to_html::main().await.unwrap();
     // let _ = html_to_googleform::main().await.unwrap();
-    let _ = google_form_to_html(
-        marksurvey_args.client_id,
-        marksurvey_args.client_secret,
-        marksurvey_args.form_id,
-    )
-    .await
-    .unwrap();
+    // let _ = google_form_to_html(
+    //     marksurvey_args.client_id,
+    //     marksurvey_args.client_secret,
+    //     marksurvey_args.form_id,
+    // )
+    // .await
+    // .unwrap();
     Ok(())
 }
 
