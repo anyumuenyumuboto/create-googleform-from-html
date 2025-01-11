@@ -78,10 +78,15 @@ impl From<Args> for MarksurveyArgs {
             ),
             _ => (None, None, None),
         };
+        let google_form_flag = match &args.command {
+            Some(Commands::Googleform { .. }) => true, // println!("Googleform"),
+            None => false,                             // println!("None"),
+        };
 
         MarksurveyArgs {
             input: args.input,
             output: args.output,
+            google_form: google_form_flag,
             client_id: client_id_value,
             client_secret: client_secret_value,
             form_id: form_id_value,
@@ -108,7 +113,6 @@ fn validate_file_extension(file: &str) -> Result<String, String> {
 async fn main() {
     let args = Args::parse();
     dbg!(&args);
-
     dbg!("main.rs");
 
     let marksurvey_args: MarksurveyArgs = args.into();
