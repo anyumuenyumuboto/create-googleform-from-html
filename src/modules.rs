@@ -76,22 +76,41 @@ pub async fn main(marksurvey_args: MarksurveyArgs) -> Result<(), Box<dyn std::er
 
     if let Some(ref input_path) = marksurvey_args.input {
         let path = Path::new(input_path);
+        let path_extension = path.extension().and_then(|ext| ext.to_str());
 
-        match path.extension().and_then(|ext| ext.to_str()) {
-            Some("md") => {
-                trace!("Processing a Markdown (.md) file: {}", input_path);
-            }
-
-            _ => {
-                trace!("Unsupported file type or no extension: {}", input_path);
-            }
+        if path_extension == Some("md") && marksurvey_args.google_form {
+            trace!(".md && googleform subcommand");
+            markdown_to_googleform(&input_path).await;
         }
+
+        // match path.extension().and_then(|ext| ext.to_str()) {
+        //     Some("md") => {
+        //         trace!("Processing a Markdown (.md) file: {}", input_path);
+        //     }
+
+        //     _ => {
+        //         trace!("Unsupported file type or no extension: {}", input_path);
+        //     }
+        // }
         trace!("{}", input_path);
     }
 
-    // match
-
     Ok(())
+}
+
+pub async fn markdown_to_googleform(markdown_file_path: &str) {
+    trace!("markdown_to_googleform");
+    match input::read_markdown_from_file(&markdown_file_path) {
+        Ok(markdown_contents) => {
+            trace!("ファイルを正常に読み込みました: {}", &markdown_contents);
+            trace!("{}", &markdown_contents);
+            let html_contents = markdown_to_html::parse(&markdown_contents);
+            trace!("{}", &html_contents);
+        }
+        Err(e) => {
+            debug!("ファイル読み込みエラー: {}", e);
+        }
+    }
 }
 
 pub async fn google_form_to_html(

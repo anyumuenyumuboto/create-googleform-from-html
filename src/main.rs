@@ -52,13 +52,17 @@ pub struct Args {
 enum Commands {
     Googleform {
         /// The client ID for Google API
-        #[arg(long, help = "Specify the client ID for the Google API.")]
+        #[arg(short = 'i', long, help = "Specify the client ID for the Google API.")]
         client_id: String,
         /// The client secret for Google API
-        #[arg(long, help = "Specify the client secret for the Google API.")]
+        #[arg(
+            short = 's',
+            long,
+            help = "Specify the client secret for the Google API."
+        )]
         client_secret: String,
         /// The form id of the Google Form
-        #[arg(long, help = "Specify the form id of the Google Form.")]
+        #[arg(short, long, help = "Specify the form id of the Google Form.")]
         form_id: String,
     },
 }
