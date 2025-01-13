@@ -6,6 +6,7 @@ use oauth2::{
 use reqwest::header::{HeaderMap, AUTHORIZATION};
 use std::io::{self, Write};
 
+use crate::models::google_form::BatchUpdate;
 use crate::models::google_form::GoogleForm;
 
 // pub(super) async fn main() {
@@ -64,9 +65,9 @@ pub(super) async fn get_access_token(
     Ok(access_token)
 }
 
-pub(super) async fn create_google_form(
+pub async fn create_google_form(
     access_token: &str,
-    form_id: &str,
+    // form_id: &str,
     params: GoogleForm,
 ) -> Result<GoogleForm, Box<dyn std::error::Error>> {
     dbg!("fetch_google_form");
@@ -101,14 +102,15 @@ pub(super) async fn create_google_form(
     Ok(body)
 }
 
-pub(super) async fn update_google_form(
+pub async fn update_google_form(
     access_token: &str,
     form_id: &str,
-    params: GoogleForm,
+    // params: GoogleForm,
+    params: BatchUpdate,
 ) -> Result<GoogleForm, Box<dyn std::error::Error>> {
-    dbg!("fetch_google_form");
+    dbg!("update_google_form");
     let url = format!(
-        "https://forms.googleapis.com/v1/forms/{}",
+        "https://forms.googleapis.com/v1/forms/{}:batchUpdate",
         form_id.to_string()
     );
     // ヘッダーを作成
@@ -128,10 +130,15 @@ pub(super) async fn update_google_form(
         .await?;
     dbg!(&response);
 
-    let body = response.json::<GoogleForm>().await?;
+    //  let body = response.json::<GoogleForm>().await?;
 
-    // レスポンスを確認
-    dbg!(&body);
+    //  // レスポンスを確認
+    //  dbg!(&body);
 
-    Ok(body)
+    //  Ok(body)
+
+    let text = response.text().await?;
+
+    dbg!(&text);
+    Ok(GoogleForm::default())
 }

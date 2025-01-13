@@ -1,6 +1,8 @@
 // 副作用のある関数はinput.rsとoutput.rs以下に置く。
 use std::fs::File;
 use std::io::Write;
+pub mod create_google_forms;
+
 pub fn write_html_to_file(
     file_path: &str,
     html_content: &str,

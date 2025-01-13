@@ -296,3 +296,27 @@ pub struct Video {
     pub youtube_uri: String,
     pub properties: Option<MediaProperties>,
 }
+
+// batchupdate
+// ref [Method: forms.batchUpdate  |  Google Forms  |  Google for Developers](https://developers.google.com/forms/api/reference/rest/v1/forms/batchUpdate?hl=ja)
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct BatchUpdate {
+    pub requests: Vec<Request>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct Request {
+    #[serde(alias = "createItem")]
+    pub create_item: CreateItemRequest,
+}
+
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct CreateItemRequest {
+    pub item: Item,
+    pub location: Location,
+}
+
+#[derive(Serialize, Deserialize, Debug, Default)]
+pub struct Location {
+    pub index: isize,
+}

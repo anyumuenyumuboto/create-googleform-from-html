@@ -17,6 +17,7 @@ pub fn main() {
 pub(super) async fn get_access_token(
     client_id_in: &str,
     client_secret_in: &str,
+    scope: &str,
 ) -> Result<String, Box<dyn std::error::Error>> {
     // Google Cloud から取得したクライアントIDとシークレット
     let client_id = ClientId::new(client_id_in.to_string());
@@ -35,7 +36,8 @@ pub(super) async fn get_access_token(
         .authorize_url(|| oauth2::CsrfToken::new_random())
         .add_scope(Scope::new(
             // "https://www.googleapis.com/auth/cloud-platform".to_string(),
-            "https://www.googleapis.com/auth/forms.body.readonly".to_string(),
+            // "https://www.googleapis.com/auth/forms.body.readonly".to_string(),
+            scope.to_string(),
         ))
         .url();
 

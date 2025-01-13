@@ -5,7 +5,9 @@ pub mod input;
 pub mod markdown_to_html;
 pub mod output;
 
+use crate::models::google_form::BatchUpdate;
 use crate::models::google_form::GoogleForm;
+use crate::models::google_form::Item;
 use clap::ValueEnum;
 use env_logger;
 use log::{debug, error, info, trace, warn};
@@ -62,50 +64,81 @@ pub async fn main(marksurvey_args: MarksurveyArgs) -> Result<(), Box<dyn std::er
             )
         })
         .init();
-    // let _ = input::main();
-    // let _ = markdown_to_html::main();
-    // let _ = googleform_to_html::main().await.unwrap();
-    // let _ = html_to_googleform::main().await.unwrap();
-    // let _ = google_form_to_html(
-    //     marksurvey_args.client_id,
-    //     marksurvey_args.client_secret,
-    //     marksurvey_args.form_id,
-    // )
-    // .await
-    // .unwrap();
 
     if let Some(ref input_path) = marksurvey_args.input {
         let path = Path::new(input_path);
+        trace!("{}", input_path);
         let path_extension = path.extension().and_then(|ext| ext.to_str());
 
         if path_extension == Some("md") && marksurvey_args.google_form {
             trace!(".md && googleform subcommand");
-            markdown_to_googleform(&input_path).await;
+            if let (Some(ref client_id), Some(ref client_secret), Some(ref form_id)) = (
+                marksurvey_args.client_id,
+                marksurvey_args.client_secret,
+                marksurvey_args.form_id,
+            ) {
+                markdown_to_googleform(&input_path, &client_id, &client_secret, &form_id).await;
+            }
         }
-
-        // match path.extension().and_then(|ext| ext.to_str()) {
-        //     Some("md") => {
-        //         trace!("Processing a Markdown (.md) file: {}", input_path);
-        //     }
-
-        //     _ => {
-        //         trace!("Unsupported file type or no extension: {}", input_path);
-        //     }
-        // }
-        trace!("{}", input_path);
     }
 
     Ok(())
 }
 
-pub async fn markdown_to_googleform(markdown_file_path: &str) {
+pub async fn markdown_to_googleform(
+    markdown_file_path: &str,
+    client_id: &str,
+    client_secret: &str,
+    form_id: &str,
+) {
     trace!("markdown_to_googleform");
     match input::read_markdown_from_file(&markdown_file_path) {
         Ok(markdown_contents) => {
             trace!("ファイルを正常に読み込みました: {}", &markdown_contents);
             trace!("{}", &markdown_contents);
-            let html_contents = markdown_to_html::parse(&markdown_contents);
+            let html_contents: String = markdown_to_html::parse(&markdown_contents);
             trace!("{}", &html_contents);
+            let html_choice_question =
+                html_to_googleform::html_to_html_choice_question(&html_contents);
+            trace!("{:#?}", &html_choice_question);
+            let googleform_item: Item =
+                html_to_googleform::choice_question_to_googleform_item(html_choice_question);
+            trace!("{:#?}", &googleform_item);
+            dbg!(&googleform_item);
+            // let googleform_choicequestion: GoogleForm =
+            //     html_to_googleform::googleform_item_to_googleform_choicequestion(googleform_item);
+            // trace!("{:#?}", &googleform_choicequestion);
+            let batchupdate: BatchUpdate =
+                html_to_googleform::googleform_item_to_batchupdate(googleform_item);
+            trace!("{:#?}", &batchupdate);
+            match authentication::get_access_token(
+                &client_id,
+                &client_secret,
+                "https://www.googleapis.com/auth/forms.body",
+            )
+            .await
+            {
+                Ok(access_token) => {
+                    dbg!(&access_token);
+                    match output::create_google_forms::update_google_form(
+                        &access_token,
+                        &form_id,
+                        batchupdate,
+                    )
+                    .await
+                    {
+                        Ok(update_response) => {
+                            dbg!(&update_response);
+                        }
+                        Err(e) => {
+                            debug!("Failed to update googleform: {}", e);
+                        }
+                    }
+                }
+                Err(e) => {
+                    debug!("Failed to retrieve the token: {}", e);
+                }
+            };
         }
         Err(e) => {
             debug!("ファイル読み込みエラー: {}", e);
@@ -129,7 +162,12 @@ pub(super) async fn get_google_form(
 ) -> Result<GoogleForm, Box<dyn std::error::Error>> {
     dbg!("fetch_google_forms");
 
-    let access_token = authentication::get_access_token(&client_id, &client_secret).await?;
+    let access_token = authentication::get_access_token(
+        &client_id,
+        &client_secret,
+        "https://www.googleapis.com/auth/forms.body.readonly",
+    )
+    .await?;
     let google_form: Result<GoogleForm, Box<dyn std::error::Error>> =
         input::fetch_google_form(&access_token, &form_id).await;
     let google_form = match google_form {

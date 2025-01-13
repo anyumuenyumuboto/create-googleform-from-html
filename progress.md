@@ -59,3 +59,7 @@ fn main() {
 }
 ```
 
+# 20240114
+```bash
+cargo run -q -- -i README.md googleform -i $CLIENT_ID -s $CLIENT_SECRET -f $FORM_ID
+```
