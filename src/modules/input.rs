@@ -1,8 +1,10 @@
 // 副作用のある関数はinput.rsとoutput.rs以下に置く。
 
 use reqwest::header::{HeaderMap, AUTHORIZATION};
+use std::fs;
 use std::fs::File;
 use std::io::Read;
+use std::path::Path;
 
 use crate::models::google_form::GoogleForm;
 // pub mod fetch_google_forms;
@@ -18,6 +20,12 @@ pub fn read_markdown_from_file(file_path: &str) -> Result<String, Box<dyn std::e
     f.read_to_string(&mut contents)?;
     dbg!(&contents);
     Ok(contents)
+}
+
+pub fn read_html_file(file_path: &Path) -> Result<String, Box<dyn std::error::Error>> {
+    let content = fs::read_to_string(file_path)?;
+    dbg!(&content);
+    Ok(content)
 }
 
 pub(super) async fn fetch_google_form(
