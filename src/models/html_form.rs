@@ -6,9 +6,11 @@ pub struct HtmlForm {
     pub questions: Vec<Question>,
 }
 
+// Rustでは列挙型のバリアントにフィールドが含まれる場合、それはタプル型構造体のように扱われ、値をラップする際に適切な構文を使う必要があります。
 #[derive(Serialize, Deserialize, Debug)]
 pub enum Question {
-    ChoiceQuestion,
+    ChoiceQuestion(ChoiceQuestion),
+    // ChoiceQuestion,
 }
 
 #[derive(Serialize, Deserialize, Debug, Default)]

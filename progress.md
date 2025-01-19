@@ -63,3 +63,10 @@ fn main() {
 ```bash
 cargo run -q -- -i README.md googleform -i $CLIENT_ID -s $CLIENT_SECRET -f $FORM_ID
 ```
+
+# 20240119
+ref [cargo testでprintを表示する | Rust - BioErrorLog Tech Blog](https://www.bioerrorlog.work/entry/cargo-test-nocapture)
+```bash
+cargo test -- --nocaptured
+```
+

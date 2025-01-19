@@ -14,8 +14,6 @@ use log::{debug, error, info, trace, warn};
 use std::io::Write;
 use std::path::Path;
 
-// use tokio;
-
 #[derive(Debug)]
 pub struct MarksurveyArgs {
     /// input file path
@@ -46,7 +44,6 @@ pub enum LogLevel {
     Critical,
 }
 
-// #[tokio::main]
 pub async fn main(marksurvey_args: MarksurveyArgs) -> Result<(), Box<dyn std::error::Error>> {
     // dbg!("module.rs");
     env_logger::Builder::from_default_env()
@@ -95,22 +92,16 @@ pub async fn markdown_to_googleform(
     match input::read_markdown_from_file(&markdown_file_path) {
         Ok(markdown_contents) => {
             trace!("ファイルを正常に読み込みました: {}", &markdown_contents);
+            // markdown文字列からhtml文字列に変換
             trace!("{}", &markdown_contents);
             let html_contents: String = markdown_to_html::parse(&markdown_contents);
             trace!("{}", &html_contents);
-            let html_choice_question =
-                html_to_googleform::html_to_html_choice_question(&html_contents);
-            trace!("{:#?}", &html_choice_question);
-            let googleform_item: Item =
-                html_to_googleform::choice_question_to_googleform_item(html_choice_question);
-            trace!("{:#?}", &googleform_item);
-            dbg!(&googleform_item);
-            // let googleform_choicequestion: GoogleForm =
-            //     html_to_googleform::googleform_item_to_googleform_choicequestion(googleform_item);
-            // trace!("{:#?}", &googleform_choicequestion);
-            let batchupdate: BatchUpdate =
-                html_to_googleform::googleform_item_to_batchupdate(googleform_item);
+
+            // html文字列からbachupdate構造体に変換する
+            let batchupdate = html_to_googleform::main(&html_contents);
             trace!("{:#?}", &batchupdate);
+
+            // get google form API token
             match authentication::get_access_token(
                 &client_id,
                 &client_secret,
@@ -120,6 +111,7 @@ pub async fn markdown_to_googleform(
             {
                 Ok(access_token) => {
                     dbg!(&access_token);
+                    // google formを更新
                     match output::create_google_forms::update_google_form(
                         &access_token,
                         &form_id,
