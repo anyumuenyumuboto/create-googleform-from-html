@@ -123,6 +123,7 @@ pub fn html_to_html_form(html_string: &str) -> HtmlForm {
     }
 
     let choice_question = ChoiceQuestion {
+        title: "", 
         description: description,
         options: checkbox_list,
         ..ChoiceQuestion::default()
@@ -133,7 +134,7 @@ pub fn html_to_html_form(html_string: &str) -> HtmlForm {
         ..HtmlForm::default()
     };
 
-    dbg!(&html_form);
+    // dbg!(&html_form);
     html_form
 }
 
@@ -155,6 +156,10 @@ mod tests {
         <h1>Title</h1>
         Some text here
         <p>Paragraph text</p>
+<li><input disabled="" type="checkbox" checked=""/>
+apple</li>
+<li><input type="checkbox"/>
+banana</li>
         <input type="checkbox">
     "#;
 
