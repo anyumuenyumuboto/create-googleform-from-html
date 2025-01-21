@@ -11,6 +11,7 @@ html-builder = "0.5.1"
 log = "0.4.24"
 oauth2 = "4.4.2"
 pulldown-cmark = "0.12.2"
+regex = "1.11.1"
 reqwest = { version = "0.12.9", features = ["json"] }
 scraper = "0.21.0"
 serde = { version = "1.0.215", features = ["derive"] }

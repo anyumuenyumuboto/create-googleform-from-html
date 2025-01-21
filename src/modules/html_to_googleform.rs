@@ -1,4 +1,5 @@
 use log::trace;
+use regex::Regex;
 use scraper::{Html, Selector};
 
 use crate::models::html_form::ChoiceQuestion;
@@ -88,8 +89,43 @@ pub fn html_to_html_form(html_string: &str) -> HtmlForm {
 
     dbg!(&checkbox_list);
 
+    // all node text
+    let node_vec = document
+        .tree
+        .nodes()
+        .map(|node| node.value())
+        .collect::<Vec<_>>();
+    dbg!(&node_vec);
+
     // h1~h6の見出し要素のセレクタを定義
     let heading_selector = Selector::parse("h1,h2,h3,h4,h5,h6").unwrap();
+    //     let heading_dbg = document
+    //         .select(&heading_selector)
+    //         .map(|x| {
+    //             x.text()
+    //                 .collect::<Vec<_>>()
+    //                 .concat()
+    //                 .trim_start()
+    //                 .to_string()
+    //         })
+    //         .collect::<Vec<_>>();
+    //     dbg!(&heading_dbg);
+    //
+    //     // h1の見出し要素のnext checkboxセレクタを定義
+    //     let heading_next_checkbox_selector =
+    //         Selector::parse(r":is(h1, h2) ~ li:has(>input[type='checkbox']):first-of-type").unwrap();
+    //     let heading_next_checkbox = document
+    //         .select(&heading_next_checkbox_selector)
+    //         .map(|x| {
+    //             x.text()
+    //                 .collect::<Vec<_>>()
+    //                 .concat()
+    //                 .trim_start()
+    //                 .to_string()
+    //         })
+    //         .collect::<Vec<_>>();
+    //     dbg!(&heading_next_checkbox);
+
     // チェックボックスのセレクタを定義
     let checkbox_selector = Selector::parse("input[type='checkbox']").unwrap();
 
@@ -123,7 +159,7 @@ pub fn html_to_html_form(html_string: &str) -> HtmlForm {
     }
 
     let choice_question = ChoiceQuestion {
-        title: "", 
+        // title: "",
         description: description,
         options: checkbox_list,
         ..ChoiceQuestion::default()
@@ -138,33 +174,59 @@ pub fn html_to_html_form(html_string: &str) -> HtmlForm {
     html_form
 }
 
-fn f() -> i32 {
-    1
+pub fn split_html_by_headings(html: &str) -> Vec<String> {
+    // 正規表現で見出しタグをキャプチャ
+    let re = Regex::new(r"(?i)(<h[1-6]>.*?</h[1-6]>)(.*?)(?=(<h[1-6]>|$))").unwrap();
+
+    // ベクトルに結果を格納
+    let mut result = Vec::new();
+
+    for caps in re.captures_iter(html) {
+        // 見出しタグとそれに続く内容を結合
+        let heading = &caps[1]; // <h[1-6]>.*?</h[1-6]>
+        let content = &caps[2]; // それに続く内容
+        result.push(format!("{}{}", heading, content));
+    }
+
+    result
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    #[test]
-    fn should_return_1() {
-        assert_eq!(f(), 1);
-    }
 
     #[test]
     fn test_html_to_html_form() {
         let html = r#"
         <h1>Title</h1>
         Some text here
+        <h2>Title2</h2>
+        Some text2 here
         <p>Paragraph text</p>
-<li><input disabled="" type="checkbox" checked=""/>
-apple</li>
-<li><input type="checkbox"/>
-banana</li>
+        <li><input disabled="" type="checkbox" checked=""/>apple</li>
+        <li><input type="checkbox"/>banana</li>
         <input type="checkbox">
     "#;
 
         let html_form = html_to_html_form(html);
         dbg!(html_form);
+    }
+
+    #[test]
+    fn test_split_html_by_headings() {
+        let html = r#"
+        <h1>Title</h1>
+        Some text here
+        <h2>Title2</h2>
+        Some text2 here
+        <p>Paragraph text</p>
+        <li><input disabled="" type="checkbox" checked=""/>apple</li>
+        <li><input type="checkbox"/>banana</li>
+        <input type="checkbox">
+    "#;
+
+        let splited_html_by_headings = split_html_by_headings(html);
+        dbg!(&splited_html_by_headings);
     }
 }
 
