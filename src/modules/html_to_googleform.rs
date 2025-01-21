@@ -176,19 +176,52 @@ pub fn html_to_html_form(html_string: &str) -> HtmlForm {
 
 pub fn split_html_by_headings(html: &str) -> Vec<String> {
     // 正規表現で見出しタグをキャプチャ
-    let re = Regex::new(r"(?i)(<h[1-6]>.*?</h[1-6]>)(.*?)(?=(<h[1-6]>|$))").unwrap();
+    let re = Regex::new(r"(?i)(<h[1-6]>.*?</h[1-6]>)").unwrap();
+
+    let headlines = re
+        .captures_iter(html)
+        .map(|caps| caps.get(1).unwrap().as_str().to_string())
+        .collect::<Vec<String>>();
+    dbg!(&headlines);
+
+    let headline_positions_start = re
+        .captures_iter(html)
+        .map(|caps| caps.get(1).unwrap().start())
+        .collect::<Vec<usize>>();
+    dbg!(&headline_positions_start);
+
+    let headline_positions_end = re
+        .captures_iter(html)
+        .map(|caps| caps.get(1).unwrap().end())
+        .collect::<Vec<usize>>();
+    dbg!(&headline_positions_end);
+
+    let html_start_plus_headline_positions_end = [vec![0], headline_positions_end].concat();
+    dbg!(&html_start_plus_headline_positions_end);
+    let headline_positions_start_plus_html_end =
+        [headline_positions_start, vec![html.len()]].concat();
+    dbg!(&headline_positions_start_plus_html_end);
+
+    let splited_html_by_headings = html_start_plus_headline_positions_end
+        .iter()
+        .zip(headline_positions_start_plus_html_end.iter())
+        .map(|(start, end)| html[*start..*end].to_string())
+        .collect::<Vec<String>>();
+    dbg!(&splited_html_by_headings);
 
     // ベクトルに結果を格納
-    let mut result = Vec::new();
+    // let mut result = Vec::new();
+    //
+    // for caps in re.captures_iter(html) {
+    //     // 見出しタグとそれに続く内容を結合
+    //     let heading = &caps[1]; // <h[1-6]>.*?</h[1-6]>
+    //     let content = &caps[2]; // それに続く内容
+    //     result.push(format!("{}{}", heading, content));
+    // }
+    //
+    // result
 
-    for caps in re.captures_iter(html) {
-        // 見出しタグとそれに続く内容を結合
-        let heading = &caps[1]; // <h[1-6]>.*?</h[1-6]>
-        let content = &caps[2]; // それに続く内容
-        result.push(format!("{}{}", heading, content));
-    }
-
-    result
+    splited_html_by_headings
 }
 
 #[cfg(test)]
