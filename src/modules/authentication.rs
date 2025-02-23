@@ -1,18 +1,23 @@
+// 副作用のある関数を置く。
+
 use oauth2::reqwest::async_http_client;
 use oauth2::{
     basic::BasicClient, AuthUrl, AuthorizationCode, ClientId, ClientSecret, RedirectUrl, Scope,
     TokenResponse, TokenUrl,
 };
-use reqwest::header::{HeaderMap, AUTHORIZATION};
+// use reqwest::header::{HeaderMap, AUTHORIZATION};
 use std::io::{self, Write};
 
-pub(super) async fn main() {
-    dbg!("fetch_google_forms");
+use crate::models::google_form::GoogleForm;
+
+pub fn main() {
+    dbg!("authentication.rs");
 }
 
 pub(super) async fn get_access_token(
     client_id_in: &str,
     client_secret_in: &str,
+    scope: &str,
 ) -> Result<String, Box<dyn std::error::Error>> {
     // Google Cloud から取得したクライアントIDとシークレット
     let client_id = ClientId::new(client_id_in.to_string());
@@ -31,7 +36,8 @@ pub(super) async fn get_access_token(
         .authorize_url(|| oauth2::CsrfToken::new_random())
         .add_scope(Scope::new(
             // "https://www.googleapis.com/auth/cloud-platform".to_string(),
-            "https://www.googleapis.com/auth/forms.body.readonly".to_string(),
+            // "https://www.googleapis.com/auth/forms.body.readonly".to_string(),
+            scope.to_string(),
         ))
         .url();
 
@@ -57,35 +63,4 @@ pub(super) async fn get_access_token(
     let access_token = token.access_token().secret().to_string();
     println!("アクセストークン: {:?}", token.access_token().secret());
     Ok(access_token)
-}
-
-pub(super) async fn fetch_google_form(
-    access_token: &str,
-    form_id: &str,
-) -> Result<(), Box<dyn std::error::Error>> {
-    dbg!("fetch_google_form");
-    let url = format!(
-        "https://forms.googleapis.com/v1/forms/{}",
-        form_id.to_string()
-    );
-    // ヘッダーを作成
-    let mut headers = HeaderMap::new();
-    headers.insert(
-        AUTHORIZATION,
-        format!("Bearer {}", access_token.to_string()).parse()?,
-    );
-    // クライアントを作成
-    let client = reqwest::Client::new();
-    // GETリクエストを送信
-    let response = client.get(url).headers(headers).send().await?;
-
-    // レスポンスを確認
-    if response.status().is_success() {
-        let body = response.text().await?;
-        println!("Response body: {}", body);
-    } else {
-        println!("Request failed with status: {}", response.status());
-    }
-
-    Ok(())
 }
